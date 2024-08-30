@@ -1,4 +1,4 @@
-# ZTNet DNS Server
+# [ZTNet](https://github.com/sinamics/ztnet) DNS Server
 
 This project aims to provide a DNS server for a specific network in zerotier. It uses `coredns` as the DNS server and ZTNet's API to get the list of devices in the network and assign them in a zone file.
 

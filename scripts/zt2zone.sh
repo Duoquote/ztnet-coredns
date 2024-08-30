@@ -47,7 +47,10 @@ for NETWORK in $@; do
     >&2 echo "ERROR GET Network Members: $members_json"
     exit 1
   fi
-  
-  # Parse JSON and format as DNS records
-  echo "$members_json" | jq -r --arg domain "$DNS_DOMAIN" '.[] | select(.authorized == true) | .ipAssignments[] as $ip | "\(.name).\($domain). IN A \($ip)"'
+
+  for member in $(echo "$members_json" | jq -r '.[] | select(.authorized == true) | .name'); do
+    ip=$(echo "$members_json" | jq -r --arg member "$member" '.[] | select(.name == $member) | .ipAssignments[0]')
+    echo "*.$member.$DNS_DOMAIN. IN A $ip"
+    echo "$member.$DNS_DOMAIN. IN A $ip"
+  done
 done
