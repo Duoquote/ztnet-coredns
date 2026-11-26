@@ -43,6 +43,7 @@ ${DNS_DOMAIN}:53 {
   forward . ${DNS_UPSTREAM}
   cache 30
   errors
+  health 127.0.0.1:8080
 }
 CONF
 elif [[ ! -f "$COREFILE" ]]; then
