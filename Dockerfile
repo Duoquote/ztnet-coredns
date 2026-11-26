@@ -34,9 +34,8 @@ COPY configs/coredns.conf /etc/supervisor/conf.d/coredns.conf
 COPY configs/zerotier.conf /etc/supervisor/conf.d/zerotier.conf
 COPY configs/zt2zone.conf /etc/supervisor/conf.d/zt2zone.conf
 
-COPY --chmod=755 scripts/zt2zone.sh scripts/zone-updater.sh /usr/local/bin/
-COPY configs/Corefile /etc/coredns/Corefile
+COPY --chmod=755 scripts/zt2zone.sh scripts/zone-updater.sh scripts/entrypoint.sh /usr/local/bin/
 
 VOLUME /var/lib/zerotier-one
 
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
