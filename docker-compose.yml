@@ -1,0 +1,19 @@
+# Copy .env.example to .env, fill in the values, then run:
+#   docker compose up -d --build
+
+services:
+  dns:
+    build: .
+    image: ztnet-coredns
+    container_name: ztnet-dns
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun # Required
+    cap_add:
+      - NET_ADMIN # Required
+    env_file: .env
+    volumes:
+      - zerotier:/var/lib/zerotier-one
+
+volumes:
+  zerotier:
