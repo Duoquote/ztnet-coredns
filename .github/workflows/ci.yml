@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run shellcheck
+        run: shellcheck scripts/*.sh
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image (amd64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ztnet-coredns:ci
+
+      - name: Smoke test
+        run: |
+          docker run --rm --entrypoint coredns ztnet-coredns:ci -version
+          docker run --rm --entrypoint zerotier-one ztnet-coredns:ci -v
+          # The entrypoint must refuse to start without configuration.
+          if docker run --rm ztnet-coredns:ci; then
+            echo "entrypoint started without required variables" >&2
+            exit 1
+          fi
+
+      - name: Build image (arm64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
