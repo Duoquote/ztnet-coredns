@@ -1,10 +1,11 @@
 # Copy .env.example to .env, fill in the values, then run:
-#   docker compose up -d --build
+#   docker compose up -d
+#
+# To build from source instead, replace the image line with: build: .
 
 services:
   dns:
-    build: .
-    image: ztnet-coredns
+    image: duoquote/ztnet-coredns:latest
     container_name: ztnet-dns
     restart: unless-stopped
     devices:

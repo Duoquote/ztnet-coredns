@@ -27,10 +27,10 @@ The CoreDNS and ZeroTier versions can be changed with the `COREDNS_VERSION` and 
 The deployment is done using docker. You can run the service on any of your servers or next to your ZTNet instance.
 
 1. Copy `.env.example` to `.env` and fill in `NETWORK_ID`, `ZTNET_API_HOST` and `ZTNET_API_TOKEN`.
-2. Build and start the container with the included `docker-compose.yml`:
+2. Start the container with the included `docker-compose.yml`. It pulls [`duoquote/ztnet-coredns`](https://hub.docker.com/r/duoquote/ztnet-coredns) from Docker Hub, built for `amd64` and `arm64`:
 
    ```bash
-   docker compose up -d --build
+   docker compose up -d
    ```
 
 3. The container joins `NETWORK_ID` on start. Authorize the new member in the ZTNet web interface.
@@ -55,7 +55,7 @@ If you run the service in the same compose project as ZTNet, add it to that file
 ```yaml
 services:
   dns:
-    build: https://github.com/Duoquote/ztnet-coredns.git
+    image: duoquote/ztnet-coredns:latest
     container_name: ztnet-dns
     restart: unless-stopped
     devices:
@@ -140,6 +140,8 @@ Go to your ZTNet Web Interface and click on the `User Settings` on left side men
 ![alt text](assets/image.png)
 
 ## Building
+
+Images on Docker Hub are tagged `latest` and by date, for example `2026.11.26`. To build your own:
 
 ```bash
 docker build -t ztnet-coredns .
