@@ -1,16 +1,33 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-RUN apt-get update && apt-get install -y \
+ARG COREDNS_VERSION=1.15.0
+ARG ZEROTIER_VERSION=1.16.2
+ARG TARGETARCH
+
+RUN set -eux; \
+    arch="${TARGETARCH:-$(dpkg --print-architecture)}"; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
         curl \
         gnupg \
-        supervisor \
         jq \
-    && \
-    curl -s https://install.zerotier.com/ | bash && \
-    curl -sL https://github.com/coredns/coredns/releases/download/v1.11.3/coredns_1.11.3_linux_amd64.tgz -o /tmp/coredns.tgz && \
-    tar -xvf /tmp/coredns.tgz -C /usr/local/bin/ && \
-    mkdir -p /etc/coredns && \
-    apt-get clean && \
+        supervisor; \
+    curl -fsSL https://download.zerotier.com/contact%40zerotier.com.gpg \
+        | gpg --dearmor -o /usr/share/keyrings/zerotier.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/zerotier.gpg] https://download.zerotier.com/debian/noble noble main" \
+        > /etc/apt/sources.list.d/zerotier.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends "zerotier-one=${ZEROTIER_VERSION}"; \
+    base="https://github.com/coredns/coredns/releases/download/v${COREDNS_VERSION}"; \
+    file="coredns_${COREDNS_VERSION}_linux_${arch}.tgz"; \
+    curl -fsSL -o "/tmp/${file}" "${base}/${file}"; \
+    curl -fsSL -o "/tmp/${file}.sha256" "${base}/${file}.sha256"; \
+    (cd /tmp && sha256sum -c "${file}.sha256"); \
+    tar -xzf "/tmp/${file}" -C /usr/local/bin coredns; \
+    mkdir -p /etc/coredns; \
+    apt-get purge -y --auto-remove gnupg; \
+    apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY configs/coredns.conf /etc/supervisor/conf.d/coredns.conf
